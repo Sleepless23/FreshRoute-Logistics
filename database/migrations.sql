@@ -19,27 +19,16 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 2. drivers Table
-DROP TABLE IF EXISTS drivers;
-CREATE TABLE drivers (
-    driver_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    license_number VARCHAR(100),
-    phone VARCHAR(20),
-    assigned_today BOOLEAN DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
 -- 3. routes Table
 DROP TABLE IF EXISTS routes;
 CREATE TABLE routes (
     route_id INT AUTO_INCREMENT PRIMARY KEY,
     route_name VARCHAR(150) NOT NULL,
     route_date DATE NOT NULL,
-    driver_id INT,
+    user_id INT,
     fuel_estimate DECIMAL(10,2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (driver_id) REFERENCES drivers(driver_id) ON DELETE SET NULL
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- 4. packages Table

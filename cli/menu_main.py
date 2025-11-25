@@ -18,11 +18,14 @@ def menu_main(user_id, user_role, user_full_name, user_username):
             call_menu_functions.append(route_menu)
         if user_role in ["admin", "dispatcher", "driver"]:
             menu_options.append("Delivery Tracking")
-            call_menu_functions.append(tracking_menu)
+            call_menu_functions.append(lambda: tracking_menu(user_id, user_role))
         if user_role in ["admin", "dispatcher", "manager"]:
             menu_options.append("Reports")
             call_menu_functions.append(reports_menu)
         if user_role == "driver":
+            menu_options.append("View My Assigned Route")
+            call_menu_functions.append(lambda: view_my_assigned_route(user_id))
+        if user_role in ["admin", "dispatcher"]:
             menu_options.append("Driver Dashboard")
             call_menu_functions.append(driver_menu)
         if user_role == "admin":
@@ -38,3 +41,7 @@ def menu_main(user_id, user_role, user_full_name, user_username):
             if menu_options.index(options) + 1 == choice_input:
                 print(f"You selected: {options}")
                 call_menu_functions[menu_options.index(options)]()
+
+def view_my_assigned_route(user_id):
+    from services.driver_service import view_driver_assigned_route
+    view_driver_assigned_route(driver_id=user_id)

@@ -4,31 +4,16 @@ from database.connection import get_connection
 
 class DriverModel:
     @staticmethod
-    def create_driver(user_id: int, license_number: str | None, phone: str | None) -> int:
-        conn = get_connection()
-        try:
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO drivers (user_id, license_number, phone) VALUES (%s, %s, %s)",
-                (user_id, license_number, phone),
-            )
-            conn.commit()
-            return cursor.lastrowid
-        finally:
-            cursor.close()
-            conn.close()
-
-    @staticmethod
     def list_drivers() -> list[dict]:
         conn = get_connection()
         try:
             cursor = conn.cursor(dictionary=True)
             cursor.execute(
                 """
-                SELECT d.driver_id, u.full_name, u.username, d.license_number, d.phone, d.assigned_today
-                FROM drivers d
-                JOIN users u ON u.user_id = d.user_id
-                ORDER BY d.driver_id DESC
+                SELECT user_id, full_name, username
+                FROM users
+                WHERE role = 'driver'
+                ORDER BY user_id DESC
                 """
             )
             return cursor.fetchall()
@@ -37,7 +22,7 @@ class DriverModel:
             conn.close()
 
     @staticmethod
-    def get_driver_assigned_route(driver_id: int) -> dict | None:
+    def get_user_assigned_route(user_id: int) -> dict | None:
         conn = get_connection()
         try:
             cursor = conn.cursor(dictionary=True)
@@ -45,11 +30,11 @@ class DriverModel:
                 """
                 SELECT r.route_id, r.route_name, r.route_date, r.fuel_estimate
                 FROM routes r
-                WHERE r.driver_id = %s
+                WHERE r.user_id = %s
                 ORDER BY r.route_date DESC, r.route_id DESC
                 LIMIT 1
                 """,
-                (driver_id,),
+                (user_id,),
             )
             return cursor.fetchone()
         finally:

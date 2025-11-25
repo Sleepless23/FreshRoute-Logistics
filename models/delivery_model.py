@@ -73,3 +73,40 @@ class DeliveryModel:
         finally:
             cursor.close()
             conn.close()
+
+    @staticmethod
+    def list_packages_by_status_for_user(status: str | None, user_id: int, user_role: str) -> list[dict]:
+        if user_role in ["admin", "dispatcher"]:
+            return DeliveryModel.list_packages_by_status(status)
+        elif user_role == "driver":
+            conn = get_connection()
+            try:
+                cursor = conn.cursor(dictionary=True)
+                if status:
+                    cursor.execute(
+                        """
+                        SELECT p.package_id, p.sender, p.recipient_name, p.status
+                        FROM packages p
+                        JOIN routes r ON p.current_route_id = r.route_id
+                        WHERE r.user_id = %s AND p.status = %s
+                        ORDER BY p.package_id DESC
+                        """,
+                        (user_id, status),
+                    )
+                else:
+                    cursor.execute(
+                        """
+                        SELECT p.package_id, p.sender, p.recipient_name, p.status
+                        FROM packages p
+                        JOIN routes r ON p.current_route_id = r.route_id
+                        WHERE r.user_id = %s
+                        ORDER BY p.package_id DESC
+                        """,
+                        (user_id,),
+                    )
+                return cursor.fetchall()
+            finally:
+                cursor.close()
+                conn.close()
+        else:
+            return []

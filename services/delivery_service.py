@@ -4,7 +4,7 @@ from models.delivery_model import DeliveryModel
 
 VALID_STATUSES = ['Pending', 'Out for Delivery', 'Delivered']
 
-def _select_package_by_status() -> int | None:
+def _select_package_by_status(user_id: int, user_role: str) -> int | None:
     status_choice = select_from_list(
         ["Any Status", *VALID_STATUSES],
         "Returning...",
@@ -15,7 +15,7 @@ def _select_package_by_status() -> int | None:
         return None
 
     status_filter = None if status_choice == 1 else VALID_STATUSES[status_choice - 2]
-    packages = DeliveryModel.list_packages_by_status(status_filter)
+    packages = DeliveryModel.list_packages_by_status_for_user(status_filter, user_id, user_role)
     if not packages:
         print("No packages found for the selected filter.")
         return None
@@ -27,9 +27,9 @@ def _select_package_by_status() -> int | None:
     return packages[pick - 1]['package_id']
 
 
-def update_delivery_status():
+def update_delivery_status(user_id: int, user_role: str):
     print("=== Update Delivery Status ===")
-    package_id = _select_package_by_status()
+    package_id = _select_package_by_status(user_id, user_role)
     if package_id is None:
         return
 
@@ -49,9 +49,9 @@ def update_delivery_status():
         print("Failed to update status:", e)
 
 
-def add_delivery_note():
+def add_delivery_note(user_id: int, user_role: str):
     print("=== Add Delivery Note ===")
-    package_id = _select_package_by_status()
+    package_id = _select_package_by_status(user_id, user_role)
     if package_id is None:
         return
 
@@ -66,11 +66,9 @@ def add_delivery_note():
         print("Failed to add note:", e)
 
 
-essage = "=== View Delivery History ==="
-
-def view_delivery_history():
-    print(essage)
-    package_id = _select_package_by_status()
+def view_delivery_history(user_id: int, user_role: str):
+    print("=== View Delivery History ===")
+    package_id = _select_package_by_status(user_id, user_role)
     if package_id is None:
         return
 
