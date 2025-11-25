@@ -1,6 +1,7 @@
 # ROLE FOR: NICOLE JOHN GARCIA
 from utils.helpers import select_from_list, input_string
 from models.driver_model import DriverModel
+from services.user_service import update_user_service
 
 
 def register_driver():
@@ -12,13 +13,43 @@ def register_driver():
         return
     user = DriverModel.get_user_by_username(username)
     if not user:
-        print("User not found.")
+        print(f"user '{username}' not found.")
+        create_new = input("Would you like to create a new driver? (y/N): ").strip().lower()
+        if create_new == 'y':
+            # Create new user as driver
+            full_name = input_string("Driver's full name: ", "Cancelled.")
+            if full_name is None:
+                return
+            password = input_string("Password: ", "Cancelled.", [], True)
+            if password is None:
+                return
+            confirm_password = input_string("Confirm Password: ", "Cancelled.", [], True)
+            if confirm_password is None:
+                return
+            if password != confirm_password:
+                print("Passwords do not match.")
+                return
+            # Create user
+            from services.user_service import create_user_service
+            success = create_user_service(full_name, username, password, 'driver')
+            if success:
+                print(f"Driver '{username}' created successfully!")
+            else:
+                print("Failed to create driver.")
         return
-    if user['role'] != 'driver':
-        print("User exists but role is not 'driver'. Update user role first.")
+    if user['role'] == 'driver':
+        print(f"User {user['username']} is already a driver.")
         return
 
-    print(f"User {user['username']} is already a driver.")
+    # Update role to driver
+    try:
+        success = update_user_service(user['user_id'], user['full_name'], user['username'], 'driver')
+        if success:
+            print(f"User {user['username']} has been registered as a driver.")
+        else:
+            print("Failed to update user role.")
+    except ValueError as e:
+        print(e)
 
 
 def view_all_drivers():
@@ -73,5 +104,4 @@ def view_driver_assigned_route(driver_id=None):
 
     print(
         f"Route #{route['route_id']} | {route['route_name']} | Date: {route['route_date']} | "
-        f"Fuel Estimate: {route['fuel_estimate']}"
-    )
+        f"Fuel Estimate: {route['fuel_estimate']}")

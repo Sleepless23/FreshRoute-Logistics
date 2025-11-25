@@ -30,7 +30,7 @@ def select_from_list(prompt_options, exit_message="Exiting...", exit_option="Exi
             if 1 <= value <= len(prompt_options):
                     return value
             else:
-                print(f"Invalid choice! Please enter a number between 1 and {len(prompt_options)}.")
+                print(f"Invalid choice! Please enter a number between 1 and {len(prompt_options) + 1}.")
 
         except ValueError:
             print("Invalid input! Please enter a valid number or 'exit'.")
